@@ -1,0 +1,12 @@
+import { Router } from "express";
+import isUserLoggedIn from "../middlewares/auth.middleware";
+import { submitBid, bidDetails, hireBid } from "../controllers/bid.controller";
+
+const bidRouter = Router();
+
+bidRouter.post("/", isUserLoggedIn, submitBid);
+
+bidRouter.get("/:gigId", bidDetails);
+bidRouter.patch("/:bidId/hire", isUserLoggedIn, hireBid);
+
+export default bidRouter;

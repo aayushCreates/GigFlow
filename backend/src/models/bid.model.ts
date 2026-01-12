@@ -1,18 +1,23 @@
 import mongoose from "mongoose";
-import { Bid } from "../types/bid.types";
+import { Bid, BidStatus } from "../types/bid.types";
 
 const bidSchema = new mongoose.Schema<Bid>(
   {
     gigId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Gig",
+      required: true,
+      index: true
     },
     freelancerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: true,
+      index: true
     },
     message: {
       type: String,
+      trim: true
     },
     price: {
       type: Number,
@@ -21,8 +26,8 @@ const bidSchema = new mongoose.Schema<Bid>(
     },
     status: {
       type: String,
-      enum: ["pending", "hired", "rejected"],
-      default: "pending",
+      enum: Object.values(BidStatus),
+      default: BidStatus.pending,
     },
   },
   {
@@ -30,6 +35,6 @@ const bidSchema = new mongoose.Schema<Bid>(
   }
 );
 
-const bidModel = mongoose.model<Bid>("Bid", bidSchema);
+const bid = mongoose.model<Bid>("Bid", bidSchema);
 
-export default bidModel;
+export default bid;
