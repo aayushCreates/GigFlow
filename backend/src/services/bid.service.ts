@@ -3,6 +3,7 @@ import bid from "../models/bid.model";
 import gig from "../models/gig.model";
 import { GigStatus } from "../types/gig.types";
 import { BidStatus } from "../types/bid.types";
+import { socketConnection } from "../socket";
 
 export class BidService {
   static async createBid(data: {
@@ -88,6 +89,14 @@ export class BidService {
       await bidDetails.save({ session });
 
       await session.commitTransaction();
+
+      const socket = socketConnection();
+      socket.to(bidDetails.freelancerId.toString()).emit("gig:hired", {
+        message: `You have been hired for "${assignedGig.title}"`,
+        gigId: assignedGig._id,
+        bidId: bidDetails._id
+      });
+
       return bidDetails;
     } catch {
       await session.abortTransaction();

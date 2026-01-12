@@ -7,11 +7,13 @@ export const submitBid = async (
     next: NextFunction
   ) => {
     try {
-      const { gigId } = req.body;
+      const { gigId, message, price } = req.body;
   
       const createdBid = await BidService.createBid({
           gigId: gigId as string,
-          freelancerId: req.user?._id?.toString() as string
+          freelancerId: req.user?._id?.toString() as string,
+          message: message,
+          price: price
       });
   
       return res.status(200).json({
