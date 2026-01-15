@@ -32,7 +32,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/gigs", gigRouter);
 app.use("/api/bids", bidRouter);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT;
 
 connectDB()
   .then(() => {

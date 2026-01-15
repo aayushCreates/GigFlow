@@ -41,6 +41,13 @@ export class BidService {
       $push: { bids: createdBid._id },
     });
 
+    const io = getIO();
+    io.to(gigDetails.owner.toString()).emit("bid:new", {
+      message: `New bid on your gig "${gigDetails.title}"`,
+      gigId: gigDetails._id,
+      bid: createdBid,
+    });
+
     return createdBid;
   }
 
