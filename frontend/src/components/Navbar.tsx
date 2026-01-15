@@ -13,6 +13,7 @@ type NavbarProps = {
 };
 
 type Notification = {
+  type: "HIRED";
   message: string;
   gigId: string;
   bidId: string;
@@ -21,7 +22,7 @@ type Notification = {
 export default function Navbar({ onGigPosted }: NavbarProps) {
   const [openGigPostModal, setOpenGigPostModal] = useState<boolean>(false);
   const { user, isAuthenticated, logout } = useAuth();
-  const [openBidHistory, setOpenBidHistory] = useState(false);
+  const [openProfileMenu, setOpenProfileMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
@@ -30,23 +31,22 @@ export default function Navbar({ onGigPosted }: NavbarProps) {
   const unreadCount = notifications.length;
 
   useEffect(() => {
-    const handleNotification = (data: Notification) => {
+    socket.on("gig:hired", (data: Notification) => {
       console.log("📩 Notification received:", data);
       setNotifications((prev) => [data, ...prev]);
       toast.success(data.message);
-    };
-
-    socket.on("gig:hired", handleNotification);
-
+    });
+  
     return () => {
-      socket.off("gig:hired", handleNotification);
+      socket.off("gig:hired");
     };
   }, []);
+  
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpenBidHistory(false);
+        setOpenProfileMenu(false);
       }
       if (
         notificationRef.current &&
@@ -113,6 +113,10 @@ export default function Navbar({ onGigPosted }: NavbarProps) {
                   <button
                     onClick={() => {
                       setOpenNotifications((prev) => !prev);
+
+                      setNotifications((prev) =>
+                        prev.map((n) => ({ ...n, isRead: true }))
+                      );
                     }}
                     className="relative"
                   >
@@ -139,8 +143,8 @@ export default function Navbar({ onGigPosted }: NavbarProps) {
                         ) : (
                           notifications.map((notification) => (
                             <div
-                              key={notification.bidId}
-                              className={`px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-0`}
+                              key={notification.gigId}
+                              className={`px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 border border-black/10`}
                             >
                               {notification.message}
                             </div>
@@ -153,7 +157,7 @@ export default function Navbar({ onGigPosted }: NavbarProps) {
 
                 <div ref={menuRef} className="relative">
                   <button
-                    onClick={() => setOpenBidHistory((prev) => !prev)}
+                    onClick={() => setOpenProfileMenu((prev) => !prev)}
                     className="relative h-9 w-9 rounded-full text-white bg-indigo-600 flex items-center justify-center text-sm font-medium"
                   >
                     {user?.name
@@ -164,33 +168,22 @@ export default function Navbar({ onGigPosted }: NavbarProps) {
                       .join("")}
                   </button>
 
-                  {openBidHistory && (
+                  {openProfileMenu && (
                     <div className="absolute right-0 top-10 w-40 bg-white border border-gray-200 rounded-md shadow-md z-50">
-                      <Link
-                        to="/bid-history"
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                      <button
+                        className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
                         onClick={() => {
-                          setOpenBidHistory(false);
+                          setOpenProfileMenu(false);
                         }}
                       >
-                        Bid History
-                      </Link>
-
-                      <Link
-                        to="/gigs-posted"
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => {
-                          setOpenBidHistory(false);
-                        }}
-                      >
-                        Gigs Posted
-                      </Link>
+                        Profile
+                      </button>
 
                       <button
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                         onClick={() => {
                           logout();
-                          setOpenBidHistory(false);
+                          setOpenProfileMenu(false);
                         }}
                       >
                         Logout

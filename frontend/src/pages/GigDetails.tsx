@@ -36,8 +36,20 @@ export default function GigDetails() {
 
       if (res.data.success) {
         const gigData = res.data.data;
+
         setGig(gigData);
-        setBids(gigData.bids || []);
+
+        if (gigData.bids) {
+          if (gigData.owner._id === user?._id) {
+            setBids(gigData.bids);
+          } else {
+            setBids(
+              gigData.bids.filter(
+                (bid: Bid) => bid.freelancer._id === user?._id
+              )
+            );
+          }
+        }
       }
     } catch (error) {
       toast.error("Error fetching gig details");
