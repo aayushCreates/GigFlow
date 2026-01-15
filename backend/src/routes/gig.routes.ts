@@ -7,4 +7,4 @@ const gigRouter = Router();
 gigRouter.get('/', allGigs);
 gigRouter.post('/', isUserLoggedIn, createGig);
 
-export default gigRouter;
+export default gigRouter;   

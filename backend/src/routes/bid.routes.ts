@@ -6,7 +6,7 @@ const bidRouter = Router();
 
 bidRouter.post("/", isUserLoggedIn, submitBid);
 
-bidRouter.get("/:gigId", bidDetails);
+bidRouter.get("/:gigId", isUserLoggedIn, bidDetails);
 bidRouter.patch("/:bidId/hire", isUserLoggedIn, hireBid);
 
 export default bidRouter;

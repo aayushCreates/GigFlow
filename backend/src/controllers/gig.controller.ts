@@ -29,30 +29,31 @@ export const createGig = async (
   res: Response,
   next: NextFunction
 ) => {
-    try {
-        if (!req.user || !req.user._id) {
-          return res.status(401).json({
-            success: false,
-            message: "Unauthorized User",
-          });
-        }
-    
-        const gig = await GigService.createGig({
-          ...req.body,
-          ownerId: req.user._id,
-        });
-    
-        return res.status(201).json({
-          success: true,
-          message: "Gig created successfully",
-          data: gig,
-        });
-      } catch (error: any) {
-        console.error("Error in createGig controller", error);
-    
-        return res.status(error.statusCode || 500).json({
-          success: false,
-          message: error.message || "Server Error in creating gig",
-        });
-      }
+  try {
+    const { title, description, budget } = req.body;
+    console.log("req.user?._id: ", req.user?._id);
+
+    const gig = await GigService.createGig({
+      title: title,
+      description: description,
+      budget: budget,
+      owner: req.user?._id?.toString() as string,
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Gig created successfully",
+      data: {
+        ...gig.toObject(),
+        ownerName: req.user?.name,
+      },
+    });
+  } catch (error: any) {
+    console.error("Error in createGig controller", error);
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Server Error in creating gig",
+    });
+  }
 };

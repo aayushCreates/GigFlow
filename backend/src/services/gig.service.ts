@@ -1,28 +1,38 @@
 import gigModel from "../models/gig.model";
 
 interface CreateGigPayload {
-    title: string;
-    description: string;
-    budget: number;
-    ownerId: string;
-  }
+  title: string;
+  description: string;
+  budget: number;
+  owner: string;
+}
 
 export class GigService {
   static async getAllGigs() {
-    return await gigModel.find({});
+    const gigs = await gigModel
+      .find({})
+      .populate("owner", "name email")
+      .lean();
+
+    return gigs.map((gig) => ({
+      ...gig,
+      owner: gig.owner,
+      ownerId: gig.owner._id,
+    }));
   }
 
   static async createGig(data: CreateGigPayload) {
-    const { title, description, budget, ownerId } = data;
+    const { title, description, budget, owner } = data;
 
-    if (!title || !description || !budget) {
+    if (!title || !budget) {
       throw {
         statusCode: 400,
         message: "Please enter the required fields to create gig",
       };
     }
+    console.log("owner", owner);
 
-    if (!ownerId) {
+    if (!owner) {
       throw {
         statusCode: 401,
         message: "Unauthorized User",
@@ -33,7 +43,7 @@ export class GigService {
       title,
       description,
       budget,
-      ownerId,
+      owner,
     });
 
     return gig;

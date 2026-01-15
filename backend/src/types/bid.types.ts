@@ -9,7 +9,7 @@ export enum BidStatus {
 
 export interface Bid {
     gigId: Types.ObjectId;
-    freelancerId: Types.ObjectId;
+    freelancer: Types.ObjectId;
     message?: string;
     price: number;
     status: BidStatus;

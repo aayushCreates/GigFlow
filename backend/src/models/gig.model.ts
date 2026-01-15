@@ -10,7 +10,7 @@ const gigSchema = new mongoose.Schema<Gig>(
       required: true,
       trim: true,
     },
-    ownerId: {
+    owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -29,7 +29,13 @@ const gigSchema = new mongoose.Schema<Gig>(
       type: String,
       enum: Object.values(GigStatus),
       default: GigStatus.open,
-    }
+    },
+    bids: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Bid",
+      },
+    ],
   },
   {
     timestamps: true,
