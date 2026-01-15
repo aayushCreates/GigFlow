@@ -19,6 +19,7 @@ import { socket } from "../api/socket";
 type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
+  loading: boolean;
   register: (userDetail: RegisterDetailsType) => void;
   login: (loginDetail: LoginDetailsType) => void;
   logout: () => void;
@@ -29,6 +30,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,23 +45,56 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("auth");
       }
     }
+    setLoading(false);
   }, []);
+
+  useEffect(() => {
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (
+          error.response &&
+          (error.response.status === 401 || error.response.status === 403)
+        ) {
+          localStorage.removeItem("auth");
+          setUser(null);
+          setIsAuthenticated(false);
+          navigate("/login");
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      api.interceptors.response.eject(interceptor);
+    };
+  }, [navigate]);
 
   useEffect(() => {
     if (user?._id) {
       socket.connect();
       socket.emit("join", user._id);
+
+      socket.on("bid:new", (data) => {
+        toast.info(data.message);
+      });
+
+      socket.on("gig:hired", (data) => {
+        toast.success(data.message);
+      });
     }
 
     return () => {
       socket.disconnect();
+      socket.off("bid:new");
+      socket.off("gig:hired");
     };
   }, [user]);
 
   const register = async (userDetail: RegisterDetailsType) => {
     try {
-      const res = await axios.post(
-        `${import.meta.env.VITE_BASE_API_URL}/auth/register`,
+      const res = await api.post(
+        `/auth/register`,
         userDetail
       );
 
@@ -121,6 +156,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         navigate("/login");
       }
     } catch (err) {
+      localStorage.removeItem("auth");
+      setUser(null);
+      setIsAuthenticated(false);
+      navigate("/login");
       toast.error("Error in loggingout");
       return;
     }
@@ -128,7 +167,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, register, login, logout }}
+      value={{ user, isAuthenticated, loading, register, login, logout }}
     >
       {children}
     </AuthContext.Provider>

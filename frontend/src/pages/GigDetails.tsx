@@ -228,17 +228,6 @@ export default function GigDetails() {
                               <div className="flex gap-2 justify-end pt-2">
                                 <button
                                   onClick={() =>
-                                    handleBidAction(
-                                      bid._id as string,
-                                      "rejected"
-                                    )
-                                  }
-                                  className="px-3 py-1 text-xs border border-red-600/20 bg-red-500/10 text-red-600 rounded-sm hover:bg-red-500/20"
-                                >
-                                  Reject
-                                </button>
-                                <button
-                                  onClick={() =>
                                     handleBidAction(bid._id as string, "hired")
                                   }
                                   className="px-3 py-1 text-xs bg-green-500/10 text-green-600 rounded-sm border border-green-500/30 hover:bg-green-500/20"
