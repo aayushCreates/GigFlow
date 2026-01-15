@@ -17,12 +17,24 @@ const server = http.createServer(app);
 
 initServer(server);
 
+const allowedOrigins = [
+  "https://gig-flow-lemon.vercel.app",
+  "http://localhost:5173",
+  process.env.FRONTEND_URL!,
+];
+
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
