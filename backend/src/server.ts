@@ -17,8 +17,6 @@ const server = http.createServer(app);
 
 initServer(server);
 
-app.set("trust proxy", 1);
-
 const allowedOrigins = [
   "https://gig-flow-lemon.vercel.app",
   "http://localhost:5173",
@@ -26,13 +24,7 @@ const allowedOrigins = [
 ];
 
 const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
