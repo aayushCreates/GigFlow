@@ -12,16 +12,16 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const res = login(form);
+      await login(form);
     } catch (err) {
       toast.error("Invalid Creadentials");
     } finally {

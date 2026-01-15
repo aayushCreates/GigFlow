@@ -6,7 +6,7 @@ import api from "../api/api";
 import { toast } from "sonner";
 import { useAuth } from "../context/auth.context";
 import type { Gig } from "../types/gig.types";
-import { BidStatus, type Bid } from "../types/bid.types";
+import { type Bid } from "../types/bid.types";
 
 export default function GigDetails() {
   const { gigId } = useParams();
@@ -36,20 +36,8 @@ export default function GigDetails() {
 
       if (res.data.success) {
         const gigData = res.data.data;
-
         setGig(gigData);
-
-        if (gigData.bids) {
-          if (gigData.owner._id === user?._id) {
-            setBids(gigData.bids);
-          } else {
-            setBids(
-              gigData.bids.filter(
-                (bid: Bid) => bid.freelancer._id === user?._id
-              )
-            );
-          }
-        }
+        setBids(gigData.bids || []);
       }
     } catch (error) {
       toast.error("Error fetching gig details");

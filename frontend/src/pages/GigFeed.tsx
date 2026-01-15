@@ -9,6 +9,7 @@ import { useAuth } from "../context/auth.context";
 
 export default function GigsFeed() {
   const [gigs, setGigs] = useState<Gig[]>([]);
+  const [biddedGigIds, setBiddedGigIds] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -19,30 +20,29 @@ export default function GigsFeed() {
   const fetchGigs = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/gigs/");
+      const gigsRes = await api.get("/gigs/");
+      if (gigsRes.data.success) {
+        setGigs(gigsRes.data.data);
+      }
 
-      if (res.data.success) {
-        let fetchedGigs: Gig[] = res.data.data;
-
-        if (status !== "all") {
-          fetchedGigs = fetchedGigs.filter((gig) => gig.status === status);
+      if (user?._id) {
+        try {
+          const bidsRes = await api.get("/bids/my-bids");
+          if (bidsRes.data.success) {
+            const ids = new Set(
+              bidsRes.data.data.map((bid: any) =>
+                typeof bid.gigId === "object" ? bid.gigId._id : bid.gigId
+              )
+            );
+            setBiddedGigIds(ids as Set<string>);
+          }
+        } catch (bidErr) {
+          console.error("Error fetching user bids:", bidErr);
         }
-
-        if (search) {
-          fetchedGigs = fetchedGigs.filter((gig) =>
-            gig.title.toLowerCase().includes(search.toLowerCase())
-          );
-        }
-
-        setGigs(fetchedGigs);
-      } else {
-        toast.error("Failed to fetch gigs");
-        setGigs([]);
       }
     } catch (err) {
       console.error(err);
       toast.error("Error fetching gigs");
-      setGigs([]);
     } finally {
       setLoading(false);
     }
@@ -50,16 +50,22 @@ export default function GigsFeed() {
 
   useEffect(() => {
     fetchGigs();
-  }, []);
+  }, [user?._id]); // Re-fetch when user login status changes
 
-  const handleGigPosted = (newGig: Gig) => {
+  const handleGigPosted = () => {
     toast.success("Gig posted successfully");
-    setGigs((prev) => [newGig, ...prev]);
   };
 
   const filteredGigs = gigs.filter((gig) => {
+    if (user?._id && (gig.owner?._id === user._id || gig.ownerId === user._id)) {
+      return false;
+    }
+
+    if (biddedGigIds.has(gig._id as string)) {
+      return false;
+    }
+
     const matchesStatus = status === "all" ? true : gig.status === status;
-    
 
     const matchesSearch = gig.title
       .toLowerCase()
@@ -107,7 +113,7 @@ export default function GigsFeed() {
           </div>
         </div>
 
-        <p className="text-sm text-gray-500 mt-6">Showing {gigs.length} gigs</p>
+        <p className="text-sm text-gray-500 mt-6">Showing {filteredGigs.length} gigs</p>
 
         {/* Gigs */}
         <div className="grid md:grid-cols-2 gap-6 mt-4">

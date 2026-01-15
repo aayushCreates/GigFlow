@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Briefcase, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { useAuth } from "../context/auth.context";
-import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -13,20 +12,19 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { register } = useAuth();
-  const navigate = useNavigate();
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
       console.log("registerform: ", form);
-      const res = register(form);
+      await register(form);
     } catch (err) {
       setError("Registration failed");
     } finally {

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 import BidModal from "./BidModal";
 import { useAuth } from "../context/auth.context";
+import { ArrowRight } from "lucide-react";
 
 interface GigCardProps {
   gig: Gig;
@@ -53,12 +54,13 @@ export default function GigCard({ gig, currentUserId }: GigCardProps) {
           </span>
 
           <div className="flex gap-2">
-            <Link
-              to={`/gig/${gig._id}`}
-              className="px-4 py-2 rounded-sm bg-gray-100 text-sm hover:bg-gray-200 transition border border-black/10"
-            >
-              View Details
-            </Link>
+          <Link
+            to={`/gigs/${gig._id}`}
+            className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
+          >
+            View Details
+            <ArrowRight size={16} />
+          </Link>
 
             {isAuthenticated && !isOwner && !hasUserBidded && gig.status === "open" && (
               <button
