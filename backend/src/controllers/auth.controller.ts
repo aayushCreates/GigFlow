@@ -4,7 +4,7 @@ import { authService } from "../services/auth.service";
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "none",
+  sameSite: "none" as const,
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
