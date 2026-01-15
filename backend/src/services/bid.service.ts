@@ -47,7 +47,8 @@ export class BidService {
   static async getBids(data: { gigId: string; userId: string }) {
     const gigDetails = await gig
       .findById(data.gigId)
-      .populate("owner", "name email");
+      .populate("owner", "name email")
+      .lean();
     if (!gigDetails) {
       throw new Error("Gig not found");
     }
@@ -59,21 +60,18 @@ export class BidService {
       bids = await bid
         .find({ gigId: data.gigId })
         .populate("freelancer", "name email")
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
     } else {
       bids = await bid
         .find({ gigId: data.gigId, freelancer: data.userId })
         .populate("freelancer", "name email")
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .lean();
     }
 
     return {
-      title: gigDetails.title,
-      budget: gigDetails.budget,
-      description: gigDetails.description,
-      status: gigDetails.status,
-      owner: gigDetails.owner,
-      ownerId: gigDetails.owner._id,
+      ...gigDetails,
       bids,
     };
   }
@@ -121,11 +119,27 @@ export class BidService {
       });
 
       return bidDetails;
-    } catch (err){
-      console.log("Error in the hire bid");
+    } catch (err: any){
+      console.log("Error in the hire bid", err);
       await session.abortTransaction();
+      throw err;
     } finally {
       session.endSession();
     }
+  }
+
+  static async getUserBids(userId: string) {
+    const bids = await bid
+      .find({ freelancer: userId })
+      .populate({
+        path: "gigId",
+        populate: {
+          path: "owner",
+          select: "name email",
+        },
+      })
+      .sort({ createdAt: -1 });
+
+    return bids;
   }
 }

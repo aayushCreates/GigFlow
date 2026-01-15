@@ -85,3 +85,27 @@ export const hireBid = async (
     });
   }
 };
+
+export const userBids = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.user?._id?.toString() as string;
+
+    const bids = await BidService.getUserBids(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: "User bids fetched successfully",
+      data: bids,
+    });
+  } catch (error: any) {
+    console.error("Error in user bids controller", error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Server Error in fetching user bids",
+    });
+  }
+};
