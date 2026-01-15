@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import { User } from "../types/user.types";
-import bcrypt from 'bcrypt';
 
 const userSchema = new mongoose.Schema<User>(
   {
@@ -21,8 +20,6 @@ const userSchema = new mongoose.Schema<User>(
     password: {
       type: String,
       required: true,
-      minLength: [8, "Password Input having atleast 8 characters"],
-      maxLength: [12, "Password Input having atmost 12 characters"],
       trim: true,
       select: false
     },
@@ -31,13 +28,6 @@ const userSchema = new mongoose.Schema<User>(
     timestamps: true,
   }
 );
-
-
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
 
 const user = mongoose.model<User>("User", userSchema);
 export default user;

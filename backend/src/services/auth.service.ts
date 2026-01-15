@@ -1,5 +1,5 @@
 import user from "../models/user.model";
-import { getJWT, validatePassword } from "../utils/auth.utils";
+import { getJWT, getPasswordHash, validatePassword } from "../utils/auth.utils";
 
 export class authService {
   static async registerUser(data: {
@@ -15,11 +15,14 @@ export class authService {
       };
     }
 
+    const hashedPassword = await getPasswordHash(data.password);
+
     const newUser = await user.create({
       name: data.name,
       email: data.email,
-      password: data.password,
+      password: hashedPassword,
     });
+    console.log("new user: ", newUser);
     if (!newUser) {
       throw {
         statusCode: 500,
@@ -40,7 +43,7 @@ export class authService {
   }
 
   static async loginUser(data: { email: string; password: string }) {
-    const existedUser = await user.findOne({ email: data.email });
+    const existedUser = await user.findOne({ email: data.email }).select("+password");
     if (!existedUser) {
       throw {
         statusCode: 400,
@@ -52,7 +55,6 @@ export class authService {
       data.password,
       existedUser.password
     );
-
     if (!isValidPassword) {
       throw {
         statusCode: 400,

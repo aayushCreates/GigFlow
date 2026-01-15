@@ -15,20 +15,21 @@ const isUserLoggedIn = async (
 
     const jwtSecret = process.env.JWT_SECRET as string;
 
-    const decodedObj = await jwt.verify(token, jwtSecret);
+    const decodedObj = jwt.verify(token, jwtSecret);
 
-    const { _id } = decodedObj as JwtPayload;
+    const { id } = decodedObj as JwtPayload;
 
-    const userDetails = await user.findById(_id);
+    const userDetails = await user.findById(id);
     if (!userDetails) {
       throw new Error("User not found");
     }
 
     req.user = userDetails;
     next();
-  } catch (err) {
+  } catch (err: any) {
+    console.error("Auth Middleware Error:", err);
     res.status(400).json({
-      message: "Err",
+      message: err.message || "Authentication Error",
     });
   }
 };

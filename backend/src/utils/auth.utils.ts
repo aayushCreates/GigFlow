@@ -1,6 +1,13 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
+export const getPasswordHash = async (plainTextPassword: string)=> {
+  const hashedPassword = await bcrypt.hash(plainTextPassword, 10);
+
+  return hashedPassword;
+}
+
+
 export const getJWT = async (id: string, email: string) => {
   const secretKey = process.env.JWT_SECRET as string;
   const jwtToken = jwt.sign({ id, email }, secretKey, { expiresIn: "7d" });
