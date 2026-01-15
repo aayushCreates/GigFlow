@@ -1,7 +1,7 @@
 import api from "../api/api";
 import { useState } from "react";
 import { X } from "lucide-react";
-import { GigStatus, type Gig } from "../types/gig.types";
+import { type Gig } from "../types/gig.types";
 import { toast } from "sonner";
 
 type PostGigModalType = {
