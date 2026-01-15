@@ -32,6 +32,10 @@ app.use("/api/auth", authRouter);
 app.use("/api/gigs", gigRouter);
 app.use("/api/bids", bidRouter);
 
+app.get('/', (req, res) => {
+  res.status(200).json({ message: "Server is running 🚀" });
+});
+
 const port = process.env.PORT;
 
 connectDB()
