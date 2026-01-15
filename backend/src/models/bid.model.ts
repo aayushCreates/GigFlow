@@ -9,7 +9,7 @@ const bidSchema = new mongoose.Schema<Bid>(
       required: true,
       index: true
     },
-    freelancerId: {
+    freelancer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -34,6 +34,8 @@ const bidSchema = new mongoose.Schema<Bid>(
     timestamps: true,
   }
 );
+
+bidSchema.index({ gigId: 1, freelancer: 1 }, { unique: true });
 
 const bid = mongoose.model<Bid>("Bid", bidSchema);
 
