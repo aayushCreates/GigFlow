@@ -7,9 +7,14 @@ import { useAuth } from "../context/auth.context";
 interface GigCardProps {
   gig: Gig;
   currentUserId: string;
+  onBidSuccess?: (gigId: string) => void;
 }
 
-export default function GigCard({ gig, currentUserId }: GigCardProps) {
+export default function GigCard({
+  gig,
+  currentUserId,
+  onBidSuccess,
+}: GigCardProps) {
   // Handle case where ownerId might be populated object or just ID string
   const ownerId = gig.owner?._id || gig.ownerId;
   const isOwner = ownerId === currentUserId;
@@ -60,14 +65,17 @@ export default function GigCard({ gig, currentUserId }: GigCardProps) {
               View Details
             </Link>
 
-            {isAuthenticated && !isOwner && !hasUserBidded && gig.status === "open" && (
-              <button
-                onClick={() => setIsBidModalOpen(true)}
-                className="px-4 py-2 rounded-sm bg-indigo-600 text-white text-sm hover:bg-indigo-700 transition"
-              >
-                Bid Now
-              </button>
-            )}
+            {isAuthenticated &&
+              !isOwner &&
+              !hasUserBidded &&
+              gig.status === "open" && (
+                <button
+                  onClick={() => setIsBidModalOpen(true)}
+                  className="px-4 py-2 rounded-sm bg-indigo-600 text-white text-sm hover:bg-indigo-700 transition"
+                >
+                  Bid Now
+                </button>
+              )}
 
             {hasUserBidded && (
               <span className="px-4 py-2 text-sm text-green-600 font-medium">
@@ -81,6 +89,7 @@ export default function GigCard({ gig, currentUserId }: GigCardProps) {
       <BidModal
         isOpen={isBidModalOpen}
         onClose={() => setIsBidModalOpen(false)}
+        onSuccess={() => onBidSuccess && onBidSuccess(gig._id as string)}
         gigId={gig._id as string}
         budget={gig.budget}
       />

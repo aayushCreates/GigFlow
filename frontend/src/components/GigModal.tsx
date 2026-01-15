@@ -1,3 +1,4 @@
+import api from "../api/api";
 import { useState } from "react";
 import { X } from "lucide-react";
 import { GigStatus, type Gig } from "../types/gig.types";
@@ -46,23 +47,28 @@ export default function PostGigModal({
     setLoading(true);
 
     try {
-      const payload: Gig = {
+      const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
         budget: Number(form.budget),
-        status: GigStatus.open,
       };
 
-      await onSuccess(payload);
-      onClose();
+      const res = await api.post("/gigs", payload);
 
-      setForm({
-        title: "",
-        description: "",
-        budget: 0,
-      });
+      if (res.data.success) {
+        toast.success("Gig posted successfully!");
+        onSuccess(res.data.data); // Pass the newly created gig data
+        onClose();
+        setForm({
+          title: "",
+          description: "",
+          budget: 0,
+        });
+      } else {
+        toast.error(res.data.message || "Failed to post gig.");
+      }
     } catch (err: any) {
-      toast.error("Failed to Post Gig");
+      toast.error(err.response?.data?.message || "Failed to Post Gig");
     } finally {
       setLoading(false);
     }
@@ -70,12 +76,9 @@ export default function PostGigModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 z-10">
-        {/* Header */}
         <div className="flex justify-between items-start mb-4">
           <div>
             <h2 className="text-xl font-semibold">Post a New Gig</h2>
@@ -88,9 +91,7 @@ export default function PostGigModal({
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Title */}
           <div>
             <label className="block text-sm font-medium mb-1">Gig Title</label>
             <input
@@ -108,7 +109,6 @@ export default function PostGigModal({
             </p>
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-medium mb-1">
               Description
@@ -128,7 +128,6 @@ export default function PostGigModal({
             </p>
           </div>
 
-          {/* Budget */}
           <div>
             <label className="block text-sm font-medium mb-1">
               Budget (USD)
@@ -150,7 +149,6 @@ export default function PostGigModal({
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
