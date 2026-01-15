@@ -6,11 +6,18 @@ import { toast } from "sonner";
 type BidModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
   gigId: string;
   budget: number;
 };
 
-export default function BidModal({ isOpen, onClose, gigId, budget }: BidModalProps) {
+export default function BidModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  gigId,
+  budget,
+}: BidModalProps) {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     price: "",
@@ -32,6 +39,7 @@ export default function BidModal({ isOpen, onClose, gigId, budget }: BidModalPro
 
       if (response.data.success) {
         toast.success("Bid placed successfully!");
+        if (onSuccess) onSuccess();
         onClose();
         setForm({ price: "", message: "" });
       } else {

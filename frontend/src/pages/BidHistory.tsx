@@ -74,7 +74,7 @@ export default function BidHistory() {
             {bids.map((bid) => (
               <div
                 key={bid._id}
-                className="bg-white border border-black/10 rounded-xl p-6 hover:shadow-md transition-shadow"
+                className="bg-white border border-black/10 rounded-xl p-6"
               >
                 <div className="flex flex-col md:flex-row justify-between gap-4">
                   <div>
@@ -83,7 +83,7 @@ export default function BidHistory() {
                         {bid.gigId.title}
                       </h2>
                       <span
-                        className={`px-2.5 py-0.5 text-xs font-medium rounded-full capitalize ${
+                        className={`px-2.5 py-0.5 text-xs font-medium rounded-sm shadow-xs capitalize ${
                           bid.status === "hired"
                             ? "bg-green-100 text-green-800"
                             : bid.status === "rejected"
@@ -106,7 +106,7 @@ export default function BidHistory() {
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end justify-between min-w-[120px]">
+                  <div className="flex flex-col items-end justify-between min-w-30">
                     <div className="text-right">
                       <p className="text-sm text-gray-500">You Bidded</p>
                       <p className="text-2xl font-bold text-indigo-600">
@@ -114,7 +114,7 @@ export default function BidHistory() {
                       </p>
                     </div>
                     <Link
-                      to={`/gigs/${bid.gigId._id}`}
+                      to={`/gig/${bid.gigId._id}`}
                       className="text-sm text-indigo-600 hover:underline mt-4 md:mt-0"
                     >
                       View Gig Details

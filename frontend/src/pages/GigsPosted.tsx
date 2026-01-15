@@ -38,7 +38,6 @@ export default function GigsPosted() {
   }, [user]);
 
   const handleGigPosted = (newGig: Gig) => {
-    toast.success("Gig posted successfully");
     setGigs((prev) => [newGig, ...prev]);
   };
 
