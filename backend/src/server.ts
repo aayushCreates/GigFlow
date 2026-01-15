@@ -7,34 +7,41 @@ import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.routes";
 import bidRouter from "./routes/bid.routes";
 import gigRouter from "./routes/gig.routes";
+import http from "http";
+import { initServer } from "./socket";
+
+dotenv.config();
 
 const app = express();
-dotenv.config();
+const server = http.createServer(app);
+
+initServer(server);
 
 app.use(
   cors({
-    origin: [`${process.env.FRONTEND_URL}`],
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
 
 app.use(express.json());
 app.use(cookieParser());
-
-app.use(morgan(`${process.env.NODE_ENV}`));
+app.use(morgan(process.env.NODE_ENV || "dev"));
 
 app.use("/api/auth", authRouter);
-app.use("/api/gigs", bidRouter);
-app.use("/api/bids", gigRouter);
+app.use("/api/gigs", gigRouter);
+app.use("/api/bids", bidRouter);
 
 const port = process.env.PORT || 5000;
+
 connectDB()
   .then(() => {
     console.log("Database connection established...");
-    app.listen(port, () => {
-      console.log("Server is successfully listening on PORT " + port + "✅✅✅");
+
+    server.listen(port, () => {
+      console.log(`Server running on PORT ${port} 🚀`);
     });
   })
-  .catch((err) => {
-    console.error("Database cannot be connected❌ ❌ ❌");
+  .catch(() => {
+    console.error("Database cannot be connected ❌");
   });

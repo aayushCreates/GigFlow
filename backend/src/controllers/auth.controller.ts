@@ -3,7 +3,7 @@ import { authService } from "../services/auth.service";
 
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+  secure: process.env.NODE_ENV === "production",
   maxAge: 7 * 24 * 60 * 60 * 1000,
 };
 
@@ -21,7 +21,7 @@ export const register = async (
         message: "Please enter the required fields",
       });
     }
-
+    
     const newUser = await authService.registerUser({
       name,
       email,
@@ -35,6 +35,8 @@ export const register = async (
       });
     }
 
+    console.log("user: ", newUser);
+
     res.cookie("token", newUser?.token, cookieOptions);
 
     res.status(200).json({
@@ -47,11 +49,34 @@ export const register = async (
       },
       token: newUser.token,
     });
-  } catch (err) {
-    console.log("Error in the register user controller");
+  } catch (err: any) {
+    console.error("Error in the register user controller:", err);
+    
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({
+        success: false,
+        message: err.message,
+      });
+    }
+
+    if (err.name === "ValidationError") {
+      const messages = Object.values(err.errors).map((val: any) => val.message);
+      return res.status(400).json({
+        success: false,
+        message: messages.join(", "),
+      });
+    }
+
+    if (err.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already exists",
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: "Server Error in registeration of user, please try again",
+      message: "Server Error in registration of user, please try again",
     });
   }
 };
@@ -86,11 +111,17 @@ export const login = async (
       },
       token: existedUser.token,
     });
-  } catch (err) {
-    console.log("Error in the login user controller");
+  } catch (err: any) {
+    console.error("Error in the login user controller:", err);
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({
+        success: false,
+        message: err.message,
+      });
+    }
     return res.status(500).json({
       success: false,
-      message: "Server Error in loggedin user, please try again",
+      message: "Server Error in logging in user, please try again",
     });
   }
 };
